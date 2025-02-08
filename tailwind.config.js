@@ -40,7 +40,7 @@ const fontStack = [
 ].join(",");
 
 module.exports = {
-  purge: ["./src/**/*.{js,ts,jsx,tsx}"],
+  content: ["./src/**/*.{js,ts,jsx,tsx}"],
   darkMode: "class", // 'media' or 'class'
   theme: {
     fontFamily: {
@@ -56,7 +56,7 @@ module.exports = {
     },
     extend: {
       minWidth: {
-        sidebar: "250px",
+        sidebar: "290px",
         pageNav: "200px",
         "70vw": "70vw",
         "80vw": "80vw",
