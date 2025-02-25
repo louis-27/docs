@@ -3,11 +3,18 @@ import {
   useTheme as useNextTheme,
 } from "next-themes";
 import Head from "next/head";
-import React, { createContext, useContext, useMemo } from "react";
+import React, {
+  createContext,
+  PropsWithChildren,
+  useContext,
+  useEffect,
+  useMemo,
+} from "react";
 import { transformThemeToCustomProperties } from "theme-custom-properties";
 import { GlobalStyles as TwinGlobalStyles } from "twin.macro";
 import { ColorMode, colorThemes, defaultColorMode } from "./colors";
 import { GlobalStyles } from "./GlobalStyles";
+import { setCookie } from "cookies-next";
 
 const themes = {
   light: { colors: colorThemes.light },
@@ -23,7 +30,9 @@ const ThemeContext = createContext<ThemeState>({} as ThemeState);
 
 export const useTheme = () => useContext(ThemeContext);
 
-export const WrappedThemeProvider: React.FC = ({ children }) => {
+export const WrappedThemeProvider: React.FC<PropsWithChildren> = ({
+  children,
+}) => {
   const { bodyCSS } = useMemo(
     () =>
       transformThemeToCustomProperties(themes, {
@@ -39,9 +48,14 @@ export const WrappedThemeProvider: React.FC = ({ children }) => {
   const themeState: ThemeState = {
     colorMode,
     setColorMode: value => {
+      setCookie("theme", value, { maxAge: 60 * 60 * 24 * 365 * 100 });
       setTheme(value);
     },
   };
+
+  useEffect(() => {
+    setCookie("theme", colorMode, { maxAge: 60 * 60 * 24 * 365 * 100 });
+  }, [colorMode]);
 
   return (
     <ThemeContext.Provider value={themeState}>
@@ -56,7 +70,7 @@ export const WrappedThemeProvider: React.FC = ({ children }) => {
   );
 };
 
-export const ThemeProvider: React.FC = props => (
+export const ThemeProvider: React.FC<PropsWithChildren> = props => (
   <NextThemeProvider
     defaultTheme="light"
     enableSystem={true}

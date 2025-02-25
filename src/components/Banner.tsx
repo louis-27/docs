@@ -1,13 +1,14 @@
-import React from "react";
-import tw, { TwStyle } from "twin.macro";
-import { Icon } from "./Icon";
+import React, { PropsWithChildren } from "react";
+import { iconFromName } from "@/utils/icon";
 import {
+  AlertTriangle,
+  CheckCircle,
   Info,
   Star,
   XOctagon,
-  CheckCircle,
-  AlertTriangle,
 } from "react-feather";
+import tw, { TwStyle } from "twin.macro";
+import { Icon } from "./Icon";
 import { Link } from "./Link";
 
 export type BannerVariant =
@@ -23,7 +24,10 @@ const defaultVariant: BannerVariant = "primary";
 export interface Props {
   variant?: BannerVariant;
   icon?: React.ComponentType;
+  iconName?: string;
   hideIcon?: boolean;
+  className?: string;
+  textContainerStyles?: TwStyle;
 }
 
 const containerStyles: Record<BannerVariant, TwStyle> = {
@@ -53,21 +57,39 @@ const defaultIcons: Record<BannerVariant, React.ComponentType | null> = {
   warning: AlertTriangle,
 };
 
-export const Banner: React.FC<Props> = ({ children, hideIcon, ...props }) => {
+export const Banner: React.FC<PropsWithChildren<Props>> = ({
+  children,
+  hideIcon,
+  textContainerStyles,
+  ...props
+}) => {
   const variant = props.variant ?? defaultVariant;
-  const icon = props.icon ?? defaultIcons[variant];
+  const icon = props.iconName
+    ? iconFromName(props.iconName)
+    : props.icon ?? defaultIcons[variant];
 
   return (
     <div
-      css={[tw`flex p-3 border rounded-md space-x-3`, containerStyles[variant]]}
+      css={[
+        tw`flex items-center py-3 px-4 border rounded-md space-x-3`,
+        containerStyles[variant],
+      ]}
       className="banner"
       {...props}
     >
       {!hideIcon && icon != null && (
-        <Icon tw="mt-1" icon={icon} css={[iconStyles[variant]]} />
+        <Icon tw="mx-1" icon={icon} css={[iconStyles[variant]]} />
       )}
-
-      {hideIcon || icon == null ? <>{children}</> : <span>{children}</span>}
+      <div
+        css={[
+          {
+            "> p": tw`my-2`,
+          },
+          textContainerStyles,
+        ]}
+      >
+        {children}
+      </div>
     </div>
   );
 };
@@ -75,21 +97,14 @@ export const Banner: React.FC<Props> = ({ children, hideIcon, ...props }) => {
 export const PriorityBoardingBanner: React.FC = () => {
   return (
     <Banner variant="primary" icon={Star}>
-      This feature is only available to{" "}
-      <Link href="/reference/priority-boarding">Priority Boarding</Link>{" "}
-      members.
-    </Banner>
-  );
-};
-
-export const PublicAPIBanner: React.FC = () => {
-  return (
-    <Banner variant="primary" icon={Star}>
-      The Public API Preview is{" "}
-      <Link href="https://railway.app/changelog/2022-11-04-shared-variables-api">
-        now available
-      </Link>{" "}
-      to Railway users on a Team plan.
+      This feature is in beta. You can enable it from your&nbsp;
+      <Link
+        href="/reference/priority-boarding"
+        className="underline hover:opacity-60"
+      >
+        account settings
+      </Link>
+      &nbsp;page.
     </Banner>
   );
 };
